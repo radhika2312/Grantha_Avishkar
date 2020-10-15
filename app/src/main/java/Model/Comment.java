@@ -1,13 +1,15 @@
 package Model;
 
 public class Comment {
+    private String id;
     private String publisher;
     private String comment;
 
     public Comment() {
     }
 
-    public Comment(String publisher, String comment) {
+    public Comment(String id,String publisher, String comment) {
+        this.id=id;
         this.publisher = publisher;
         this.comment = comment;
     }
@@ -26,5 +28,13 @@ public class Comment {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

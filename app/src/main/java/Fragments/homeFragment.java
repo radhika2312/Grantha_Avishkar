@@ -8,8 +8,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.grantha.R;
 import com.google.firebase.database.DataSnapshot;
@@ -18,6 +22,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import Adapter.PostAdapter;
@@ -39,6 +44,9 @@ public class homeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
+        //for sorting menu
+        setHasOptionsMenu(true);
+
         View view=inflater.inflate(R.layout.fragment_home, container, false);
         recyclerViewPosts=view.findViewById(R.id.recycler_view_posts);
         //recyclerViewPosts.setAdapter(postAdapter);
@@ -55,6 +63,36 @@ public class homeFragment extends Fragment {
         readPosts();
 
         return view;
+    }
+
+    //sort feature
+    //sort menu
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.sort,menu);
+        super.onCreateOptionsMenu(menu,inflater);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        switch (item.getItemId())
+        {
+            case R.id.menu_sortLike:
+                Collections.sort(postList,Post.SortbyLikes);
+                Toast.makeText(getContext(),"sort by likes",Toast.LENGTH_SHORT).show();
+                postAdapter.notifyDataSetChanged();
+                return true;
+
+            case R.id.menu_sortTitle:
+                Collections.sort(postList,Post.SortbyTitle);
+                Toast.makeText(getContext(),"sort by title", Toast.LENGTH_SHORT).show();
+                postAdapter.notifyDataSetChanged();
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void readPosts() {

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Title"
+        android:textSize="20dp"
+        android:textAlignment="center"
+        android:maxLines="1"
+        android:textStyle="bold"
+        android:textColor="@android:color/primary_text_light"
+        android:id="@+id/title"/>
+    <Button
+        android:id="@+id/btn_edit"
+        android:layout_width="165dp"
+        android:layout_height="34dp"
+
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="211dp"
+        android:layout_marginLeft="211dp"
+        android:layout_marginTop="9dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginRight="25dp"
+        android:background="@drawable/button_background"
+        android:text="Edit"
+        android:textSize="18dp"
+        android:textColor="@android:color/secondary_text_light"
+        android:visibility="visible" />
+
+
+</RelativeLayout>

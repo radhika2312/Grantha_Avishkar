@@ -10,9 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.grantha.CommentActivity;
+import com.example.grantha.PostDetail;
 import com.example.grantha.R;
 import com.google.common.collect.BiMap;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,8 +26,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.hendraanggrian.appcompat.widget.SocialTextView;
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
 import java.util.List;
 
+import Fragments.profileFragment;
 import Model.Post;
 import Model.User;
 
@@ -68,7 +72,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 if(user.getImageurl().equals("default")){
                     holder.profile_image.setImageResource(R.mipmap.ic_launcher);
                 }else{
-                    Picasso.get().load(post.getImageUrl()).into(holder.profile_image);
+                    Picasso.get().load(user.getImageurl()).into(holder.profile_image);
                 }
 
                 holder.username.setText(user.getUsername());
@@ -118,6 +122,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 if (holder.like.getTag().equals("like")) {
                     FirebaseDatabase.getInstance().getReference().child("Likes").child(post.getPostId())
                             .child(firebaseUser.getUid()).setValue(true);
+                    addNotification(post.getPostId(),post.getPublisher());
 
                 } else {
                     FirebaseDatabase.getInstance().getReference().child("Likes").child(post.getPostId())
@@ -164,13 +169,50 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             }
         });
 
+        //redirecting user to image profile whenever clicks on profile image or username
+        holder.profile_image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mContext.getSharedPreferences("PROFILE",Context.MODE_PRIVATE).edit()
+                        .putString("profileId",post.getPublisher()).apply();
+                ((FragmentActivity)mContext).getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container,new profileFragment()).commit();
+            }
+        });
 
+        holder.username.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mContext.getSharedPreferences("PROFILE",Context.MODE_PRIVATE).edit()
+                        .putString("profileId",post.getPublisher()).apply();
+                ((FragmentActivity)mContext).getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container,new profileFragment()).commit();
+            }
+        });
 
+        holder.author.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mContext.getSharedPreferences("PROFILE",Context.MODE_PRIVATE).edit()
+                        .putString("profileId",post.getPublisher()).apply();
+                ((FragmentActivity)mContext).getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container,new profileFragment()).commit();
+            }
+        });
 
+        //redirecting to individual article when clicked on image of the post
+        holder.postImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mContext.getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit().putString("postId",post.getPostId()).apply();
+                ((FragmentActivity)mContext).getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container,new PostDetail()).commit();
 
-
-
+            }
+        });
     }
+
+
 
 
     @Override
@@ -256,12 +298,16 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
     }
 
     //to check no of likes
-    private void noOfLikes(String postId, final TextView text) {
+    private void noOfLikes(final String postId, final TextView text) {
         FirebaseDatabase.getInstance().getReference().child("Likes").child(postId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         text.setText(snapshot.getChildrenCount()+" upVotes");
+                        String x= String.valueOf(snapshot.getChildrenCount());
+                        FirebaseDatabase.getInstance().getReference().child("Posts").child(postId).child("like").setValue(x);
+
+
                     }
 
                     @Override
@@ -355,6 +401,19 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
                     }
                 });
+    }
+
+    //adding notifiactions whenever a post is liked
+    private void addNotification(String postId, String publisher) {
+        HashMap<String ,Object> map=new HashMap<>();
+
+        map.put("userid",firebaseUser.getUid());
+        map.put("text","liked your article");
+        map.put("postid",postId);
+        map.put("isPost","true");
+
+        FirebaseDatabase.getInstance().getReference().child("Notifications").child(publisher)
+                .push().setValue(map);
     }
 
 

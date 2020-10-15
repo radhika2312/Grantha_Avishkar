@@ -1,6 +1,7 @@
 package Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +11,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.grantha.EditProfile;
 import com.example.grantha.R;
+import com.example.grantha.home;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -20,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
 import java.util.List;
 
 import Model.User;
@@ -45,9 +49,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         firebaseUser= FirebaseAuth.getInstance().getCurrentUser();
-        User user=mUsers.get(position);
+        final User user=mUsers.get(position);
         holder.btnFollow.setVisibility(View.VISIBLE);
         holder.username.setText(user.getUsername());
         holder.name.setText(user.getName());
@@ -60,9 +64,72 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder>{
             holder.btnFollow.setVisibility(View.GONE);
         }
 
+        //follow following feature
+        holder.btnFollow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String btn = holder.btnFollow.getText().toString();
+
+                  if (btn.equals("follow")) {
+                    FirebaseDatabase.getInstance().getReference().child("Follow").child(firebaseUser.getUid())
+                            .child("following").child(user.getId()).setValue(true);
+                    //user----username
+                    FirebaseDatabase.getInstance().getReference().child("Follow").child(user.getId())
+                            .child("followers").child(firebaseUser.getUid()).setValue(true);
+
+                    //adding notification..
+                      addNotification(user.getId());
+
+                } else {
+                    FirebaseDatabase.getInstance().getReference().child("Follow").child(firebaseUser.getUid())
+                            .child("following").child(user.getId()).removeValue();
+                    //user----username
+                    FirebaseDatabase.getInstance().getReference().child("Follow").child(user.getId())
+                            .child("followers").child(firebaseUser.getUid()).removeValue();
+
+                }
+
+
+            }
+        });
+
+        //redirecting to profile if clicked on image or name...
+        holder.imageProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(mContext, home.class);
+                intent.putExtra("publisherId",user.getId());
+                mContext.startActivity(intent);
+
+            }
+        });
+
+        holder.username.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(mContext, home.class);
+                intent.putExtra("publisherId",user.getId());
+                mContext.startActivity(intent);
+
+            }
+        });
 
 
 
+
+
+    }
+
+    private void addNotification(String id) {
+        HashMap<String ,Object> map=new HashMap<>();
+
+        map.put("userid",firebaseUser.getUid());
+        map.put("text","started following you");
+        map.put("postid","");
+        map.put("isPost","false");
+
+        FirebaseDatabase.getInstance().getReference().child("Notifications").child(id)
+                .push().setValue(map);
     }
 
     private void isFollowed(final String id, final Button btnFollow) {

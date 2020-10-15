@@ -1,5 +1,7 @@
 package Model;
 
+import java.util.Comparator;
+
 public class Post {
 
     private String imageUrl;
@@ -7,16 +9,32 @@ public class Post {
     private String publisher;
     private String title;
     private String article;
+    private String like;
 
     public Post() {
     }
 
-    public Post(String imageUrl, String postId, String publisher, String title, String article) {
+    //sort by popularity in home fragment
+    public static Comparator<Post> SortbyLikes =new Comparator<Post>() {
+        @Override
+        public int compare( Post o1, Post o2) {
+            return o1.getLike().compareTo(o2.getLike());
+        }
+    };
+    public static Comparator<Post> SortbyTitle =new Comparator<Post>() {
+        @Override
+        public int compare( Post o1, Post o2) {
+            return o2.getTitle().toLowerCase().compareTo(o1.getTitle().toLowerCase());
+        }
+    };
+
+    public Post(String imageUrl, String postId, String publisher, String title, String article,String like) {
         this.imageUrl = imageUrl;
         this.postId = postId;
         this.publisher = publisher;
         this.title = title;
         this.article = article;
+        this.like=like;
     }
 
     public String getImageUrl() {
@@ -58,4 +76,10 @@ public class Post {
     public void setArticle(String article) {
         this.article = article;
     }
+
+    public String getLike() {
+        return like;
+    }
+
+    public void setLike(String like) { this.like = like; }
 }

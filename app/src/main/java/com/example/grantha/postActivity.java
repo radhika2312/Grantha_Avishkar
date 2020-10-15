@@ -149,6 +149,7 @@ public class postActivity extends AppCompatActivity {
                     //map.put("description",description.getText().toString());
                     map.put("article",knife.toHtml());
                     map.put("publisher", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    map.put("like","0");
                     ref.child(postId).setValue(map);
 
                     /*DatabaseReference mHashTagRef=FirebaseDatabase.getInstance().getReference().child("HashTags");

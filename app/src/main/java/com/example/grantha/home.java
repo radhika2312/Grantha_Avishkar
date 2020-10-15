@@ -56,7 +56,24 @@ public class home extends AppCompatActivity {
 
             }
         });
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new profileFragment()).commit();
+        //when redirected from comment activity
+        Bundle intent =getIntent().getExtras();
+        if(intent!=null){
+
+            String profileId=intent.getString("publisherId");
+            //using shared preferences
+            getSharedPreferences("PROFILE",MODE_PRIVATE).edit().putString("profileId",profileId).apply();
+
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new profileFragment()).commit();
+            //change the selected fragment at bottom bar
+            bottomNavigationView.setSelectedItemId(R.id.nav_person);
+
+        }else{
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new homeFragment()).commit();
+        }
+
+
+
 
     }
 }

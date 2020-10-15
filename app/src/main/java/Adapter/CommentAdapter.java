@@ -1,15 +1,22 @@
 package Adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.grantha.R;
+import com.example.grantha.home;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -26,12 +33,14 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHolder> {
     private Context mContext;
+    String postId;
     private List<Comment> mComments;
     private FirebaseUser fUser;
 
-    public CommentAdapter(Context mContext, List<Comment> mComments) {
+    public CommentAdapter(Context mContext, List<Comment> mComments,String postId) {
         this.mContext = mContext;
         this.mComments = mComments;
+        this.postId=postId;
     }
 
     @NonNull
@@ -46,7 +55,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         fUser= FirebaseAuth.getInstance().getCurrentUser();
-        Comment comment=mComments.get(position);
+        final Comment comment=mComments.get(position);
         holder.comment.setText(comment.getComment());
         //not knowing the name of publisher directly ..but having publisher id,,,so wud query to the db
 
@@ -65,6 +74,65 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
+            }
+        });
+
+        //on clicking on comment or profile image..redirecting to profile of that user
+        holder.comment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(mContext, home.class);
+                intent.putExtra("publisherId",comment.getPublisher());
+                //intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                mContext.startActivity(intent);
+
+            }
+        });
+        holder.imageProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(mContext,home.class);
+                intent.putExtra("publisherId",comment.getPublisher());
+                mContext.startActivity(intent);
+            }
+        });
+
+
+        //deleting comments
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+
+            @Override
+            public boolean onLongClick(View v) {
+                if (comment.getPublisher().equals(fUser.getUid())) {
+                    AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
+                    alertDialog.setTitle("Do you want to delete?");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "NO", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+                    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(final DialogInterface dialog, int which) {
+                            FirebaseDatabase.getInstance().getReference().child("Comments").child(postId)
+                                    .child(comment.getId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(mContext, "comment deleted successfully", Toast.LENGTH_SHORT).show();
+                                        dialog.dismiss();
+                                    }
+                                }
+
+
+                            });
+                        }
+                    });
+                    alertDialog.show();
+
+                }
+                return true;
             }
         });
 
@@ -91,6 +159,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
             imageProfile=itemView.findViewById(R.id.image_profile);
         }
     }
+
+
 
 
 }
