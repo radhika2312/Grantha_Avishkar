@@ -220,6 +220,17 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 mContext.startActivity(intent);
             }
         });
+        
+        // send link 
+         holder.share.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+
+               ((home)mContext).createlink(post.getTitle(),post.getImageUrl(),post.getPostId());
+
+           }
+
+       });
 
 
     }
