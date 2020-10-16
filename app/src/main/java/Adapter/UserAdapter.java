@@ -9,9 +9,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.grantha.EditProfile;
 import com.example.grantha.R;
 import com.example.grantha.home;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,6 +26,7 @@ import com.squareup.picasso.Picasso;
 import java.util.HashMap;
 import java.util.List;
 
+import Fragments.profileFragment;
 import Model.User;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -111,6 +112,24 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder>{
                 intent.putExtra("publisherId",user.getId());
                 mContext.startActivity(intent);
 
+            }
+        });
+
+        //redirection to profile ..
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isFragment){
+                    mContext.getSharedPreferences("PROFILE",Context.MODE_PRIVATE).edit()
+                            .putString("profileId",user.getId()).apply();
+
+                    ((FragmentActivity)mContext).getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container,new profileFragment()).commit();
+                }else{
+                    Intent intent =new Intent(mContext,home.class);
+                    intent.putExtra("publisherId",user.getId());
+                    mContext.startActivity(intent);
+                }
             }
         });
 

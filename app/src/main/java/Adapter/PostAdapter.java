@@ -14,16 +14,15 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.grantha.CommentActivity;
+import com.example.grantha.FollowersActivity;
 import com.example.grantha.PostDetail;
 import com.example.grantha.R;
-import com.google.common.collect.BiMap;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.hendraanggrian.appcompat.widget.SocialTextView;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -210,6 +209,19 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
             }
         });
+
+        //redirecting to list of users who liked..
+        holder.noOfLikes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(mContext, FollowersActivity.class);
+                intent.putExtra("id",post.getPublisher());
+                intent.putExtra("title","likes");
+                mContext.startActivity(intent);
+            }
+        });
+
+
     }
 
 
