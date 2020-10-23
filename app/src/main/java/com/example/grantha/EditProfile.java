@@ -2,8 +2,10 @@ package com.example.grantha;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -32,10 +34,13 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.HashMap;
 
 import Model.User;
 import de.hdodenhof.circleimageview.CircleImageView;
+import id.zelory.compressor.Compressor;
 
 public class EditProfile extends AppCompatActivity {
 
@@ -49,6 +54,7 @@ public class EditProfile extends AppCompatActivity {
     private MaterialEditText interest;
     private FirebaseUser fUser;
     private Uri mImageUri;
+    private Bitmap bitmap;
     private StorageTask uploadTask;
     StorageReference storageReference;
 
@@ -147,9 +153,24 @@ public class EditProfile extends AppCompatActivity {
         pd.show();
         if(mImageUri!=null)
         {
-            final StorageReference fileRef=storageReference.child(System.currentTimeMillis()+".jpg");
+            File filepathUri =new File(mImageUri.getPath());
 
-            uploadTask=fileRef.putFile(mImageUri);
+            bitmap = new Compressor.Builder(this)
+                    .setMaxWidth(150)
+                    .setMaxHeight(150)
+                    .setQuality(50)
+                    .setCompressFormat(Bitmap.CompressFormat.WEBP)
+                    .setDestinationDirectoryPath(Environment.getExternalStoragePublicDirectory(
+                            Environment.DIRECTORY_PICTURES).getAbsolutePath())
+                    .build()
+                    .compressToBitmap(filepathUri);
+            ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG,50,byteArrayOutputStream);
+            final byte[] bytes=byteArrayOutputStream.toByteArray();
+
+            final StorageReference filepathuri=storageReference.child(System.currentTimeMillis()+".jpg");
+
+            uploadTask=filepathuri.putFile(mImageUri);
             uploadTask.continueWithTask(new Continuation() {
                 @Override
                 public Object then(@NonNull Task task) throws Exception {
@@ -157,7 +178,7 @@ public class EditProfile extends AppCompatActivity {
                         throw task.getException();
 
 
-                    return fileRef.getDownloadUrl();
+                    return filepathuri.getDownloadUrl();
                 }
             }).addOnCompleteListener(new OnCompleteListener<Uri>() {
                 @Override

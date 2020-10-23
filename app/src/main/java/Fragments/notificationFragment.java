@@ -1,11 +1,18 @@
 package Fragments;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.grantha.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -44,6 +52,7 @@ public class notificationFragment extends Fragment {
     private RecyclerView recyclerViewReport;
     private ReportAdapter reportAdapter;
     private List<Post> reportList;
+    private int count;
 
     //private List<String> idList;
 
@@ -135,6 +144,38 @@ public class notificationFragment extends Fragment {
 
                         }
                     });
+
+                    FirebaseDatabase.getInstance().getReference("ReportAbuse").addChildEventListener(new ChildEventListener() {
+                        @Override
+                        public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+
+                                notification("Reported Abuse");
+
+                        }
+
+                        @Override
+                        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                        }
+
+                        @Override
+                        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+
+                        }
+
+                        @Override
+                        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
                 }
             }
 
@@ -168,6 +209,38 @@ public class notificationFragment extends Fragment {
 
                         }
                     });
+                    FirebaseDatabase.getInstance().getReference("PermissionNeeded").addChildEventListener(new ChildEventListener() {
+                        @Override
+                        public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+
+                                notification("Permission Needed");
+
+                        }
+
+                        @Override
+                        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                        }
+
+                        @Override
+                        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+
+                        }
+
+                        @Override
+                        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+
                 }
             }
 
@@ -177,6 +250,8 @@ public class notificationFragment extends Fragment {
             }
         });
     }
+
+
 
     private void readNotifications() {
         FirebaseDatabase.getInstance().getReference().child("Notifications").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
@@ -196,4 +271,38 @@ public class notificationFragment extends Fragment {
                     }
                 });
     }
+
+    private void notification(String title) {
+        String NOTIFICATION_CHANNEL_ID = "example.grantha.postActivity";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        {
+            NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID,"Notification",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager notificationManager=getContext().getSystemService(NotificationManager.class);
+            notificationChannel.setDescription("Grantha");
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.BLUE);
+            notificationChannel.enableLights(true);
+            notificationChannel.setShowBadge(true);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(getContext(),NOTIFICATION_CHANNEL_ID);
+
+        notificationBuilder.setAutoCancel(true)
+                .setDefaults(android.app.Notification.DEFAULT_ALL)
+                .setWhen(System.currentTimeMillis())
+                .setSmallIcon(R.drawable.ic_action_home)
+                .setContentTitle(title)
+                .setContentText("new post added")
+                .setContentInfo("Info")
+        ;
+
+        NotificationManagerCompat managerCompat= NotificationManagerCompat.from(getContext());
+
+        managerCompat.notify(count,notificationBuilder.build());
+        count++;
+
+    }
+
 }

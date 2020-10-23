@@ -34,6 +34,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:19.2.0'
     implementation 'com.google.firebase:firebase-firestore:21.7.1'
     implementation 'com.google.firebase:firebase-invites:17.0.0'
+    implementation 'com.google.firebase:firebase-messaging:17.3.4'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
@@ -60,6 +61,5 @@ dependencies {
     //for edit profile ..material text
     implementation 'com.rengwuxian.materialedittext:library:2.1.4'
 
-
-
+    implementation 'id.zelory:compressor:1.0.4'
 }
