@@ -1,14 +1,29 @@
 package com.example.grantha;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.MenuItem;
-
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
+
+import java.util.Objects;
 
 import Fragments.homeFragment;
 import Fragments.notificationFragment;
@@ -28,7 +43,7 @@ public class home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         
-        //detect dynamic link
+        /*//detect dynamic link
          FirebaseDynamicLinks.getInstance()
                 .getDynamicLink(getIntent())
                 .addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
@@ -54,7 +69,7 @@ public class home extends AppCompatActivity {
                         // account.
 
                         //open postDetail activity of specific post
-                        getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit().putString("postId",referLink).apply();
+                        getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit().putString("postId",referLink).apply();
                         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new PostDetail()).commit();
 
 
@@ -67,7 +82,7 @@ public class home extends AppCompatActivity {
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "getDynamicLink:onFailure", e);
                     }
-                });
+                });*/
 
         bottomNavigationView=findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -114,11 +129,53 @@ public class home extends AppCompatActivity {
         }else{
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new homeFragment()).commit();
         }
+
+
+
+        //detect dynamic link
+        FirebaseDynamicLinks.getInstance()
+                .getDynamicLink(getIntent())
+                .addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
+                    @Override
+                    public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                        // Get deep link from result (may be null if no link is found)
+                        Uri deepLink = null;
+                        if (pendingDynamicLinkData != null) {
+                            deepLink = pendingDynamicLinkData.getLink();
+                        }
+                        if (deepLink != null) {
+                            referLink = deepLink.toString();
+                            try {
+                                //extract postId from link
+                                referLink = referLink.substring(referLink.lastIndexOf("=") + 1);
+                            } catch (Exception e) {
+                                // error
+                            }
+
+
+                            // Handle the deep link. open the linked
+                            // content, or apply promotional credit to the user's
+                            // account.
+
+                            //open postDetail activity of specific post
+                            getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit().putString("postId", referLink).apply();
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new PostDetail()).commit();
+
+
+                        }
+                    }
+                })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "getDynamicLink:onFailure", e);
+                    }
+                });
     }
     
-     public void createlink(String title, String url,String post) {
+     public void createlink(String title, String post) {
 
-       /* DynamicLink dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
+       DynamicLink dynamicLink = FirebaseDynamicLinks.getInstance().createDynamicLink()
                 .setLink(Uri.parse("https://www.com.example.grantha/home"))
                 .setDomainUriPrefix("https://granthaapp.page.link")
                 // Open links with this app on Android
@@ -127,7 +184,7 @@ public class home extends AppCompatActivity {
 
         Uri dynamicLinkUri = dynamicLink.getUri();
 
-        */
+
 
 
        String shareLinkText= "https://granthaapp.page.link/?"+

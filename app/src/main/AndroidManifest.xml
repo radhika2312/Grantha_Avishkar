@@ -12,19 +12,24 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".FollowersActivity"></activity>
+        <activity android:name=".ReportFullView"></activity>
+        <activity android:name=".ArticleFullView" />
+        <activity android:name=".EditArticle" />
+        <activity android:name=".FollowersActivity" />
         <activity android:name=".EditProfile" />
         <activity android:name=".CommentActivity" />
         <activity android:name=".postActivity" />
-          <activity android:name=".home">
-        <intent-filter>
-            <action android:name="android.intent.action.VIEW"/>
-            <category android:name="android.intent.category.DEFAULT"/>
-            <category android:name="android.intent.category.BROWSABLE"/>
-            <data
-                android:host="granthaapp.page.link"
-                android:scheme="https"/>
-        </intent-filter>
+        <activity android:name=".home">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="granthaapp.page.link"
+                    android:scheme="https" />
+            </intent-filter>
         </activity>
         <activity android:name=".registration" />
         <activity android:name=".MainActivity">

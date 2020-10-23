@@ -10,7 +10,7 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.MimeTypeMap;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -25,46 +25,37 @@ import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
-import com.hendraanggrian.appcompat.widget.SocialAutoCompleteTextView;
+import com.rengwuxian.materialedittext.MaterialEditText;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.util.HashMap;
 
+import Model.Post;
 import io.github.mthli.knife.KnifeText;
 
-import static com.theartofdev.edmodo.cropper.CropImage.ActivityResult;
-import static com.theartofdev.edmodo.cropper.CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE;
-import static com.theartofdev.edmodo.cropper.CropImage.getActivityResult;
+public class EditArticle extends AppCompatActivity {
 
-public class postActivity extends AppCompatActivity {
-
+    private String postId;
     private ImageView close;
-    private String imageUrl;
-    private ImageView image_added;
-    private TextView post;
-    private EditText title;
-    SocialAutoCompleteTextView description;
-    private Uri imageUri;
-
-    //now for rich texting...
-
-
-    /*private static final String BOLD = "<b>Bold</b><br><br>";
-    private static final String ITALIT = "<i>Italic</i><br><br>";
-    private static final String UNDERLINE = "<u>Underline</u><br><br>";
-    private static final String STRIKETHROUGH = "<s>Strikethrough</s><br><br>"; // <s> or <strike> or <del>
-    private static final String BULLET = "<ul><li>asdfg</li></ul>";
-    private static final String QUOTE = "<blockquote>Quote</blockquote>";
-    private static final String LINK = "<a href=\"https://github.com/mthli/Knife\">Link</a><br><br>";
-    private static final String EXAMPLE = BOLD + ITALIT + UNDERLINE + STRIKETHROUGH + BULLET + QUOTE + LINK;*/
-
+    private TextView save;
+    private Button editImage;
     private KnifeText knife;
+    private MaterialEditText title;
+    private String authorId;
+
+    private FirebaseUser fUser;
+    private Uri mImageUri;
+    private StorageTask uploadTask;
+    StorageReference storageReference;
 
 
 
@@ -72,17 +63,21 @@ public class postActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_post);
+        setContentView(R.layout.activity_edit_article);
 
+        Intent intent=getIntent();
+        postId=intent.getStringExtra("postId");
+        authorId=intent.getStringExtra("authorId");
+
+
+        knife=findViewById(R.id.knife);
+        save=findViewById(R.id.save);
         close=findViewById(R.id.close);
-        image_added=findViewById(R.id.image_added);
-        post=findViewById(R.id.post);
-        //description=findViewById(R.id.description);
+        editImage=findViewById(R.id.edit_image);
         title=findViewById(R.id.title);
 
-        //for rich text
-        knife = (KnifeText) findViewById(R.id.knife);
-        //knife.fromHtml();
+
+        //setting up rich text editor
         knife.setSelection(knife.getEditableText().length());
 
         setupBold();
@@ -93,109 +88,72 @@ public class postActivity extends AppCompatActivity {
         setupQuote();
         setupLink();
         setupClear();
+        //setting up storage ref for images..is STORAGE section of firebase
+        storageReference= FirebaseStorage.getInstance().getReference().child("Uploads");
 
 
+        FirebaseDatabase.getInstance().getReference().child("Posts").child(postId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        Post post=snapshot.getValue(Post.class);
+                        title.setText(post.getTitle());
+                        knife.fromHtml(post.getArticle());
+                    }
 
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+        //working of close button
         close.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                startActivity(new Intent(postActivity.this,home.class));
+            public void onClick(View v) {
                 finish();
             }
         });
-
-        //uploading image
-        post.setOnClickListener(new View.OnClickListener() {
+        //changing post image..
+        editImage.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                upload();
+            public void onClick(View v) {
+
+                CropImage.activity().setAspectRatio(1,1)
+                        .start(EditArticle.this);
             }
         });
-        CropImage.activity().start(postActivity.this);
+
+        //saving the editted article..
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateProfile(title.getText().toString(),knife.toHtml());
+                finish();
+
+            }
+
+        });
+
+
+
+
 
     }
 
-    private void upload() {
-        final ProgressDialog pd=new ProgressDialog(this);
-        pd.setMessage("Uploading");
-        pd.show();
-        if(imageUri!=null){
-            final StorageReference filePath= FirebaseStorage.getInstance().getReference("Posts")
-                    .child(System.currentTimeMillis()+"."+getFileExtension(imageUri));
 
-            StorageTask uploadTask=filePath.putFile(imageUri);
-            uploadTask.continueWithTask(new Continuation() {
-                @Override
-                public Object then(@NonNull Task task) throws Exception {
-                    if(!task.isSuccessful()){
-                        throw task.getException();
-                    }
-                    return filePath.getDownloadUrl();
-                }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    Uri downloadUri=task.getResult();
-                    imageUrl=downloadUri.toString();
+    //updating article..
+    private void updateProfile(String title, String knifeData) {
+        DatabaseReference reference=FirebaseDatabase.getInstance().getReference().child("Posts").child(postId);
+        HashMap<String,Object> hashMap =new HashMap<>();
+        hashMap.put("title", title);
+        hashMap.put("article", knifeData);
+        //updating the article..
+        reference.updateChildren(hashMap);
 
-                    //every article needs permission from admin to be posted publically..
-                    //hence,first svaed in d8ifferent branch of firebase!
-                    DatabaseReference ref= FirebaseDatabase.getInstance().getReference("PermissionNeeded");
-                    String postId=ref.push().getKey();
-                    HashMap<String,Object> map=new HashMap<>();
-                    map.put("postId",postId);
-                    map.put("title",title.getText().toString());
-                    map.put("imageUrl",imageUrl);
-                    //map.put("description",description.getText().toString());
-                    map.put("article",knife.toHtml());
-                    map.put("publisher", FirebaseAuth.getInstance().getCurrentUser().getUid());
-                    map.put("like","0");
-                    ref.child(postId).setValue(map);
-
-                    /*DatabaseReference mHashTagRef=FirebaseDatabase.getInstance().getReference().child("HashTags");
-                    List<String> hashTags=description.getHashtags();
-                    if(!hashTags.isEmpty()){
-                        for(String tag:hashTags){
-                            map.clear();
-                            map.put("tag",tag.toLowerCase());
-                            map.put("postId",postId);
-                            mHashTagRef.child(tag.toLowerCase()).child(postId).setValue(map);
-                        }
-                    }*/
-                    pd.dismiss();
-                    startActivity(new Intent(postActivity.this,home.class));
-                    finish();
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(postActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
-                }
-            });
-
-        }else{
-            Toast.makeText(postActivity.this,"No image was selected",Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private String getFileExtension(Uri Uri) {
-        return MimeTypeMap.getSingleton().getExtensionFromMimeType(this.getContentResolver().getType(Uri));
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode== CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode==RESULT_OK){
-            ActivityResult result= getActivityResult(data);
-            imageUri=result.getUri();
-            image_added.setImageURI(imageUri);
-        }else{
-            Toast.makeText(postActivity.this,"cancelled,Try again",Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(postActivity.this,home.class));
-            finish();
-        }
-    }
 
     //functions for rich text
 
@@ -212,7 +170,7 @@ public class postActivity extends AppCompatActivity {
         bold.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Toast.makeText(postActivity.this,"toast_bold", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditArticle.this,"toast_bold", Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -231,7 +189,7 @@ public class postActivity extends AppCompatActivity {
         italic.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Toast.makeText(postActivity.this, "toast_italic", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditArticle.this, "toast_italic", Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -250,7 +208,7 @@ public class postActivity extends AppCompatActivity {
         underline.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Toast.makeText(postActivity.this, R.string.toast_underline, Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditArticle.this, R.string.toast_underline, Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -269,7 +227,7 @@ public class postActivity extends AppCompatActivity {
         strikethrough.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Toast.makeText(postActivity.this, R.string.toast_strikethrough, Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditArticle.this, R.string.toast_strikethrough, Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -289,7 +247,7 @@ public class postActivity extends AppCompatActivity {
         bullet.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Toast.makeText(postActivity.this,"toast_bullet", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditArticle.this,"toast_bullet", Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -308,7 +266,7 @@ public class postActivity extends AppCompatActivity {
         quote.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Toast.makeText(postActivity.this, R.string.toast_quote, Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditArticle.this, R.string.toast_quote, Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -327,7 +285,7 @@ public class postActivity extends AppCompatActivity {
         link.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Toast.makeText(postActivity.this,"toast_insert_link", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditArticle.this,"toast_insert_link", Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -346,7 +304,7 @@ public class postActivity extends AppCompatActivity {
         clear.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Toast.makeText(postActivity.this, R.string.toast_format_clear, Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditArticle.this, R.string.toast_format_clear, Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -411,5 +369,73 @@ public class postActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+
+    //for post image changing..
+    private  void uploadImage()
+    {
+        final ProgressDialog pd=new ProgressDialog(this);
+        pd.setMessage("Uploading");
+        pd.show();
+        if(mImageUri!=null)
+        {
+            final StorageReference fileRef=storageReference.child(System.currentTimeMillis()+".jpg");
+
+            uploadTask=fileRef.putFile(mImageUri);
+            uploadTask.continueWithTask(new Continuation() {
+                @Override
+                public Object then(@NonNull Task task) throws Exception {
+                    if(!task.isSuccessful())
+                        throw task.getException();
+
+
+                    return fileRef.getDownloadUrl();
+                }
+            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                @Override
+                public void onComplete(@NonNull Task<Uri> task) {
+                    if(task.isSuccessful())
+                    {
+                        Uri downloadUri=task.getResult();
+                        String url=downloadUri.toString();
+                        //adding to database
+                        FirebaseDatabase.getInstance().getReference("Posts")
+                                .child(postId).child("imageurl").setValue(url);
+
+                        //HashMap<String,Object> hashMap =new HashMap<>();
+                        //hashMap.put("imageurl",""+url);
+                        pd.dismiss();
+                    }
+                    else {
+                        Toast.makeText(EditArticle.this,"failed",Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(EditArticle.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        }
+        else
+            Toast.makeText(EditArticle.this,"no image selected",Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode==CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode==RESULT_OK){
+            CropImage.ActivityResult result=CropImage.getActivityResult(data);
+            mImageUri=result.getUri();
+            //upload the image in storage and return the downloaded url
+            uploadImage();
+        }
+        else{
+            Toast.makeText(EditArticle.this,"PLEASE TRY AGAIN", Toast.LENGTH_SHORT).show();
+        }
+
     }
 }

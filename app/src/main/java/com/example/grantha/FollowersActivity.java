@@ -43,7 +43,12 @@ public class FollowersActivity extends AppCompatActivity {
         //setting up toolbar...this time in java activity instead of xml
         Toolbar toolbar =findViewById(R.id.toolbar);
         //setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(title);
+        if(title.equals("likes")){
+            getSupportActionBar().setTitle("Upvotes");
+        }else{
+            getSupportActionBar().setTitle(title);
+        }
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //going back to the activity from where it started..
@@ -60,6 +65,7 @@ public class FollowersActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         mUsers=new ArrayList<>();
         userAdapter=new UserAdapter(this,mUsers,false);
+        recyclerView.setAdapter(userAdapter);
 
         //initiallisig id list
         idList=new ArrayList<>();
@@ -80,7 +86,7 @@ public class FollowersActivity extends AppCompatActivity {
     }
 
     private void getFollowers() {
-        FirebaseDatabase.getInstance().getReference().child("Follow").child("followers")
+        FirebaseDatabase.getInstance().getReference().child("Follow").child(id).child("followers")
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -102,7 +108,7 @@ public class FollowersActivity extends AppCompatActivity {
 
 
     private void getFollowings() {
-        FirebaseDatabase.getInstance().getReference().child("Follow").child("following")
+        FirebaseDatabase.getInstance().getReference().child("Follow").child(id).child("following")
                 .addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -150,8 +156,8 @@ public class FollowersActivity extends AppCompatActivity {
                 mUsers.clear();
                 for(DataSnapshot Snap:snapshot.getChildren()){
                     User user =Snap.getValue(User.class);
-                    for(String id:idList){
-                        if(user.getId().equals(id)){
+                    for(String id1:idList){
+                        if(user.getId().equals(id1)){
                             mUsers.add(user);
                         }
                     }

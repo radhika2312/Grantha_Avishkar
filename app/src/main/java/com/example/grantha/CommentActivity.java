@@ -1,11 +1,5 @@
 package com.example.grantha;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -13,6 +7,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -144,13 +144,19 @@ public class CommentActivity extends AppCompatActivity {
                             //adding notification
                             HashMap<String ,Object> map=new HashMap<>();
 
+                            //adding id to each notification..
+                            DatabaseReference ref1=FirebaseDatabase.getInstance().getReference().child("Notifications").child(authorId);
+                            String id1=ref1.push().getKey();
+
                             map.put("userid",fUser.getUid());
                             map.put("text","commented on your article");
                             map.put("postid",postId);
                             map.put("isPost","true");
+                            map.put("id",id1);
 
-                            FirebaseDatabase.getInstance().getReference().child("Notifications").child(authorId)
-                                    .push().setValue(map);
+
+
+                          ref1.child(id1).setValue(map);
                         }else{
                             Toast.makeText(CommentActivity.this,task.getException().getMessage(),Toast.LENGTH_SHORT).show();
 

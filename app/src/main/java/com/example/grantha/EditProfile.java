@@ -1,9 +1,5 @@
 package com.example.grantha;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -12,6 +8,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -116,6 +116,7 @@ public class EditProfile extends AppCompatActivity {
             public void onClick(View v) {
                 updateProfile(fullname.getText().toString(),username.getText().toString(),bio.getText().toString()
                         ,interest.getText().toString());
+                finish();
 
             }
 

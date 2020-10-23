@@ -29,6 +29,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import Adapter.TitleAdapter;
@@ -150,6 +151,20 @@ public class profileFragment extends Fragment {
                     //user----username
                     FirebaseDatabase.getInstance().getReference().child("Follow").child(profileId)
                             .child("followers").child(fUser.getUid()).setValue(true);
+
+                    //adding notifications
+                    HashMap<String ,Object> map=new HashMap<>();
+                    //adding id..
+                    DatabaseReference ref1=FirebaseDatabase.getInstance().getReference().child("Notifications").child(profileId);
+                    String id1=ref1.push().getKey();
+                    map.put("userid",fUser.getUid());
+                    map.put("text","started following you");
+                    map.put("postid","");
+                    map.put("isPost","false");
+                    map.put("id",id1);
+
+                    ref1.child(id1).setValue(map);
+
 
                 } else {
                     FirebaseDatabase.getInstance().getReference().child("Follow").child(fUser.getUid())
