@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -24,9 +25,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import Model.Notification;
 import Model.Post;
+import Model.User;
 
 public class TitleAdapter extends RecyclerView.Adapter<TitleAdapter.ViewHolder>{
     private Context mContext;
@@ -120,10 +124,78 @@ public class TitleAdapter extends RecyclerView.Adapter<TitleAdapter.ViewHolder>{
                         @Override
                         public void onClick(final DialogInterface dialog, int which) {
 
-                            String deletePost=post.getPostId();
-                            FirebaseDatabase.getInstance().getReference().child("Posts").child(post.getPostId()).removeValue();
-                            FirebaseDatabase.getInstance().getReference().child("Likes").child(post.getPostId()).removeValue();
-                            FirebaseDatabase.getInstance().getReference().child("Comments").child(post.getPostId()).removeValue();
+                            final String deleteId=post.getPostId();
+
+                            deletePost(deleteId);
+                            deleteBook(deleteId);
+
+
+                            //making list of present users
+                            final List<User> users=new ArrayList<>();
+                            FirebaseDatabase.getInstance().getReference().child("Users").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    for (DataSnapshot snap1:snapshot.getChildren()){
+                                        User user1=snap1.getValue(User.class);
+                                        users.add(user1);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+
+
+                            //trying a query
+                            /*for(User u:users){
+                                FirebaseDatabase.getInstance().getReference().child("Bookmarks").child(u.getId())
+                                        .child(post.getPostId()).removeValue();
+                            }*/
+
+
+                            FirebaseDatabase.getInstance().getReference().child("Notifications").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    for(final DataSnapshot snap2:snapshot.getChildren()){
+                                        final String key2=snap2.getKey();
+                                        Toast.makeText(mContext,key2,Toast.LENGTH_SHORT).show();
+                                        FirebaseDatabase.getInstance().getReference().child("Notifications").child(key2).addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot Snapshot) {
+                                                for(DataSnapshot snap3:Snapshot.getChildren()){
+                                                    Notification notify=snap3.getValue(Notification.class);
+                                                    if(notify.getPostid().equals(deleteId)){
+                                                        FirebaseDatabase.getInstance().getReference().child("Notifications")
+                                                                .child(key2).child(notify.getId()).removeValue();
+                                                    }
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+
+                                            }
+                                        });
+                                    }
+                                }
+
+
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+
+
+                            //deleting data of article from likes and comments section
+                            //FirebaseDatabase.getInstance().getReference().child("Likes").child(deleteId).removeValue();
+                            //FirebaseDatabase.getInstance().getReference().child("Comments").child(deleteId).removeValue();
+
+
+
 
                         }
                     });
@@ -134,6 +206,50 @@ public class TitleAdapter extends RecyclerView.Adapter<TitleAdapter.ViewHolder>{
             }
         });
 
+
+
+    }
+
+    private void deleteBook(final String deleteId) {
+        //deleting data of articles from bookmarks
+        final List<String> keys=new ArrayList<>();
+        FirebaseDatabase.getInstance().getReference().child("Bookmarks").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot snap:snapshot.getChildren()){
+                    String k=snap.getKey();
+                    //Toast.makeText(mContext,k,Toast.LENGTH_SHORT).show();
+                    FirebaseDatabase.getInstance().getReference().child("Bookmarks").child(k).child(deleteId).removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
+    private void deletePost(final String deleteId) {
+        //deleting articles from post section
+        FirebaseDatabase.getInstance().getReference().child("Posts").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snap:snapshot.getChildren())
+                {
+                    Post post1=snap.getValue(Post.class);
+                    if(post1.getPostId().equals(deleteId)){
+                        FirebaseDatabase.getInstance().getReference().child("Posts").child(post1.getPostId()).removeValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
 
     }
