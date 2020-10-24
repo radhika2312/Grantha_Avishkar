@@ -189,7 +189,7 @@ public class TitleAdapter extends RecyclerView.Adapter<TitleAdapter.ViewHolder>{
                                 }
                             });
 
-
+                            //this creating error...so dont ever uncomment this
                             //deleting data of article from likes and comments section
                             //FirebaseDatabase.getInstance().getReference().child("Likes").child(deleteId).removeValue();
                             //FirebaseDatabase.getInstance().getReference().child("Comments").child(deleteId).removeValue();

@@ -22,8 +22,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import Model.Notification;
 import Model.Post;
 
 public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder> {
@@ -94,14 +96,75 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
         holder.reject.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               FirebaseDatabase.getInstance().getReference().child("Posts").child(post.getPostId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                final String deleteId=post.getPostId();
+
+
+
+
+
+                FirebaseDatabase.getInstance().getReference().child("Posts").child(post.getPostId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                    @Override
                    public void onComplete(@NonNull Task<Void> task) {
                        if(task.isSuccessful()){
+                           deleteBook(deleteId);
                            Toast.makeText(mContext,"Article deleted!",Toast.LENGTH_SHORT).show();
+                           FirebaseDatabase.getInstance().getReference().child("Notifications").addValueEventListener(new ValueEventListener() {
+                               @Override
+                               public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                   for(final DataSnapshot snap2:snapshot.getChildren()){
+                                       final String key2=snap2.getKey();
+                                       Toast.makeText(mContext,key2,Toast.LENGTH_SHORT).show();
+                                       FirebaseDatabase.getInstance().getReference().child("Notifications").child(key2).addValueEventListener(new ValueEventListener() {
+                                           @Override
+                                           public void onDataChange(@NonNull DataSnapshot Snapshot) {
+                                               for(DataSnapshot snap3:Snapshot.getChildren()){
+                                                   Notification notify=snap3.getValue(Notification.class);
+                                                   if(notify.getPostid().equals(deleteId)){
+                                                       FirebaseDatabase.getInstance().getReference().child("Notifications")
+                                                               .child(key2).child(notify.getId()).removeValue();
+                                                   }
+                                               }
+                                           }
+
+                                           @Override
+                                           public void onCancelled(@NonNull DatabaseError error) {
+
+                                           }
+                                       });
+                                   }
+                               }
+
+
+
+                               @Override
+                               public void onCancelled(@NonNull DatabaseError error) {
+
+                               }
+                           });
                        }
                    }
                });
+            }
+        });
+
+    }
+
+    private void deleteBook(final String deleteId) {
+        //deleting data of articles from bookmarks
+        final List<String> keys=new ArrayList<>();
+        FirebaseDatabase.getInstance().getReference().child("Bookmarks").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot snap:snapshot.getChildren()){
+                    String k=snap.getKey();
+                    //Toast.makeText(mContext,k,Toast.LENGTH_SHORT).show();
+                    FirebaseDatabase.getInstance().getReference().child("Bookmarks").child(k).child(deleteId).removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
 
