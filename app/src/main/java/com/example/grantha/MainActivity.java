@@ -4,8 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -34,11 +36,28 @@ public class MainActivity extends AppCompatActivity {
     TextView mCreateBtn,forgotTextLink;
     ProgressBar progressBar;
     FirebaseAuth fAuth;
+    private String loggedIn;
+    private String email_,passWord;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        loadPreferences();
+         if(FirebaseAuth.getInstance().getCurrentUser()==null)
+          {
+           loggedIn="no";
+          }
+
+        if(!loggedIn.equals("no")) {
+            Toast.makeText(getApplicationContext(),"Login Success!",Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(MainActivity.this,home.class);
+            intent.putExtra("EMAIL",loggedIn);
+            startActivity(intent);
+           finish();
+        }
         setContentView(R.layout.activity_main);
 
         email = findViewById(R.id.Email);
@@ -56,15 +75,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                String e = email.getText().toString().trim();
-                String p = password.getText().toString().trim();
+                 email_ = email.getText().toString().trim();
+                 passWord = password.getText().toString().trim();
 
-                if(TextUtils.isEmpty(e)){
+                if(TextUtils.isEmpty(email_)){
                     email.setError("Email is Required.");
                     return;
                 }
 
-                if(TextUtils.isEmpty(p)){
+                if(TextUtils.isEmpty(passWord)){
                     password.setError("Password is Required.");
                     return;
                 }
@@ -78,13 +97,19 @@ public class MainActivity extends AppCompatActivity {
 
                 // authenticate the user
 
-                fAuth.signInWithEmailAndPassword(e,p).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                fAuth.signInWithEmailAndPassword(email_,passWord).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
-                            if(fuser.isEmailVerified()) {
+                            if(fAuth.getCurrentUser() !=null && fAuth.getCurrentUser().isEmailVerified()) {
+                                clearTable();
+                                saveTable();
                                 Toast.makeText(MainActivity.this, "Logged in Successfully", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(getApplicationContext(), home.class));
+                                Intent intent = new Intent(MainActivity.this,home.class);
+                                intent.putExtra("EMAIL",email_);
+                                startActivity(intent);
+                                //finish();
+
                             }
                             else
                                 Toast.makeText(MainActivity.this, "Please verify your email", Toast.LENGTH_SHORT).show();
@@ -151,6 +176,30 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+    private void loadPreferences()
+    {
+        SharedPreferences sharedPreferences=getSharedPreferences("usersave",MODE_PRIVATE);
+        loggedIn=sharedPreferences.getString("User","no");
+        if(loggedIn.equals("") || loggedIn.isEmpty() || loggedIn.equals("no"))
+            loggedIn="no";
+    }
+
+    private void clearTable()
+    {
+        SharedPreferences preferences = getSharedPreferences("usersave", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.commit();
+    }
+
+    private void saveTable()
+    {
+        SharedPreferences sharedPreferences=getSharedPreferences("usersave",MODE_PRIVATE);
+        SharedPreferences.Editor editor=sharedPreferences.edit();
+        editor.putString("User",email_);
+        editor.apply();
+    }
+
 
 
 
