@@ -2,6 +2,7 @@ package com.example.grantha;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -103,6 +104,8 @@ public class home extends AppCompatActivity {
                         selectorFragment=new searchFragment();
                         break;
                     case R.id.nav_person:
+                        SharedPreferences preferences=getSharedPreferences("PROFILE",0);
+                        preferences.edit().remove("profileId").commit();
                         selectorFragment=new profileFragment();
                         break;
                 }

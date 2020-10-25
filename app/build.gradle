@@ -59,6 +59,8 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview-selection:1.1.0-rc03"
     //for edit profile ..material text
     implementation 'com.rengwuxian.materialedittext:library:2.1.4'
+    //photo compressor
+    implementation 'id.zelory:compressor:1.0.4'
 
 
 

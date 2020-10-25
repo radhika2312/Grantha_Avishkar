@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                                 Intent intent = new Intent(MainActivity.this,home.class);
                                 intent.putExtra("EMAIL",email_);
                                 startActivity(intent);
-                                //finish();
+                                finish();
 
                             }
                             else

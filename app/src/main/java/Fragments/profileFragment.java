@@ -1,6 +1,8 @@
 package Fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.grantha.EditProfile;
 import com.example.grantha.FollowersActivity;
+import com.example.grantha.MainActivity;
 import com.example.grantha.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -222,6 +225,31 @@ public class profileFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+
+        //logout
+        options.setOnClickListener(new View.OnClickListener() {
+            AlertDialog alertDialog=new AlertDialog.Builder(getContext()).create();
+            @Override
+            public void onClick(View v) {
+
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Logout", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        FirebaseAuth.getInstance().signOut();
+                        Intent intent=new Intent(getContext(), MainActivity.class);
+                        startActivity(intent);
+                        dialog.dismiss();
+
+                    }
+                });
+                alertDialog.show();
+            }
+
+
+        });
+
         return view;
     }
 
