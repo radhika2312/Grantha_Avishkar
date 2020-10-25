@@ -12,7 +12,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ReportFullView"></activity>
+        <activity android:name=".MessageActivity"></activity>
+        <activity android:name=".ChatActivity" />
+        <activity android:name=".ReportFullView" />
         <activity android:name=".ArticleFullView" />
         <activity android:name=".EditArticle" />
         <activity android:name=".FollowersActivity" />

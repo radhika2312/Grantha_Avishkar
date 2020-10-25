@@ -1,20 +1,22 @@
 package Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.grantha.ChatActivity;
 import com.example.grantha.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,6 +38,8 @@ public class homeFragment extends Fragment {
     private PostAdapter postAdapter;
     private List<Post> postList;
 
+    private ImageView chat;
+
 
 
 
@@ -49,6 +53,7 @@ public class homeFragment extends Fragment {
 
         View view=inflater.inflate(R.layout.fragment_home, container, false);
         recyclerViewPosts=view.findViewById(R.id.recycler_view_posts);
+        chat=view.findViewById(R.id.chat);
         //recyclerViewPosts.setAdapter(postAdapter);
         recyclerViewPosts.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(getContext());
@@ -61,6 +66,15 @@ public class homeFragment extends Fragment {
 
         //recyclerViewPosts.setAdapter(postAdapter);
         readPosts();
+
+        chat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(getContext(), ChatActivity.class);
+                startActivity(intent);
+
+            }
+        });
 
         return view;
     }
