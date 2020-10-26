@@ -24,6 +24,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -198,10 +202,27 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
+    private void status(String status)
+    {
+        DatabaseReference ref= FirebaseDatabase.getInstance().getReference().child("Users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
+        HashMap<String,Object> map=new HashMap<>();
 
+        map.put("status",status);
+        ref.updateChildren(map);
 
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        status("online");
+    }
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        status("offline");
+    }
 }

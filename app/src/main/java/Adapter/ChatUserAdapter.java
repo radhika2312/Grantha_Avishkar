@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -57,6 +58,14 @@ public class ChatUserAdapter extends RecyclerView.Adapter<ChatUserAdapter.ViewHo
             }
         });
 
+        if(user.getStatus().equals("online")){
+            holder.imgOn.setVisibility(View.VISIBLE);
+            holder.imgOff.setVisibility(View.GONE);
+        }else{
+            holder.imgOn.setVisibility(View.GONE);
+            holder.imgOff.setVisibility(View.VISIBLE);
+        }
+
     }
 
     @Override
@@ -68,12 +77,16 @@ public class ChatUserAdapter extends RecyclerView.Adapter<ChatUserAdapter.ViewHo
     public class ViewHolder extends RecyclerView.ViewHolder{
         public CircleImageView imageProfile;
         public TextView username;
+        public ImageView imgOn;
+        public ImageView imgOff;
 
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             username=itemView.findViewById(R.id.username);
             imageProfile=itemView.findViewById(R.id.image_profile);
+            imgOff=itemView.findViewById(R.id.img_off);
+            imgOn=itemView.findViewById(R.id.img_on);
         }
     }
 }

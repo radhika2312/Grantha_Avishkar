@@ -8,11 +8,12 @@ public class User {
     private String imageurl;
     private String bio;
     private String interest;
+    private String status;
 
     public User() {
     }
 
-    public User(String email, String id, String username, String name, String imageurl, String bio, String interest) {
+    public User(String email, String id, String username, String name, String imageurl, String bio, String interest,String status) {
         this.email = email;
         this.id = id;
         this.username = username;
@@ -20,6 +21,7 @@ public class User {
         this.imageurl = imageurl;
         this.bio = bio;
         this.interest = interest;
+        this.status=status;
     }
 
     public String getEmail() {
@@ -76,5 +78,13 @@ public class User {
 
     public void setInterest(String interest) {
         this.interest = interest;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
