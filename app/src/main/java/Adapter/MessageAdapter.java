@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 
+import Model.CodeAndDecode;
 import Model.Message;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder>{
@@ -48,7 +49,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Message message=mChat.get(position);
 
-        holder.mssg.setText(message.getText());
+        final String secretKey = "grantha!radhika!poorvi";
+        String encryptedString = message.getText();
+        String decryptedString = CodeAndDecode.decrypt(encryptedString, secretKey) ;
+
+
+        holder.mssg.setText(decryptedString);
     }
 
     @Override

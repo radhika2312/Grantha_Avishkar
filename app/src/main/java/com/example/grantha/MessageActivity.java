@@ -25,10 +25,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import Adapter.MessageAdapter;
+import Model.CodeAndDecode;
 import Model.Message;
 import Model.User;
 import de.hdodenhof.circleimageview.CircleImageView;
-
 public class MessageActivity extends AppCompatActivity {
 
     private CircleImageView userImage;
@@ -96,10 +96,14 @@ public class MessageActivity extends AppCompatActivity {
                     Toast.makeText(MessageActivity.this,"Empty Message",Toast.LENGTH_SHORT).show();
                 }
                 else{
+
+                    final String secretKey = "grantha!radhika!poorvi";
+
+                    String encryptedString = CodeAndDecode.encrypt(txtSend.getText().toString(), secretKey) ;
                     HashMap<String,Object> map=new HashMap<>();
                     map.put("sender",userId);
                     map.put("receiver",fUser.getUid());
-                    map.put("text",txtSend.getText().toString());
+                    map.put("text",encryptedString);
 
                     FirebaseDatabase.getInstance().getReference().child("Chats").push().setValue(map);
 
