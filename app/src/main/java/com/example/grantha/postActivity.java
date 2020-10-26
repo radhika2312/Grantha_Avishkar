@@ -4,8 +4,10 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,8 +36,11 @@ import com.google.firebase.storage.StorageTask;
 import com.hendraanggrian.appcompat.widget.SocialAutoCompleteTextView;
 import com.theartofdev.edmodo.cropper.CropImage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.HashMap;
 
+import id.zelory.compressor.Compressor;
 import io.github.mthli.knife.KnifeText;
 
 import static com.theartofdev.edmodo.cropper.CropImage.ActivityResult;
@@ -51,6 +56,7 @@ public class postActivity extends AppCompatActivity {
     private EditText title;
     SocialAutoCompleteTextView description;
     private Uri imageUri;
+    private Bitmap bitmap=null;
 
     //now for rich texting...
 
@@ -116,40 +122,54 @@ public class postActivity extends AppCompatActivity {
     }
 
     private void upload() {
-        final ProgressDialog pd=new ProgressDialog(this);
+        final ProgressDialog pd = new ProgressDialog(this);
         pd.setMessage("Uploading");
         pd.show();
-        if(imageUri!=null){
-            final StorageReference filePath= FirebaseStorage.getInstance().getReference("Posts")
-                    .child(System.currentTimeMillis()+"."+getFileExtension(imageUri));
+        if (imageUri != null) {
+            File filepathUri = new File(imageUri.getPath());
 
-            StorageTask uploadTask=filePath.putFile(imageUri);
+            bitmap = new Compressor.Builder(this)
+                    .setMaxWidth(700)
+                    .setMaxHeight(700)
+                    .setQuality(100)
+                    .setCompressFormat(Bitmap.CompressFormat.WEBP)
+                    .setDestinationDirectoryPath(Environment.getExternalStoragePublicDirectory(
+                            Environment.DIRECTORY_PICTURES).getAbsolutePath())
+                    .build()
+                    .compressToBitmap(filepathUri);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+            final byte[] bytes = byteArrayOutputStream.toByteArray();
+
+
+            final StorageReference filePathUri = FirebaseStorage.getInstance().getReference("Posts")
+                    .child(System.currentTimeMillis() + ".jpg");
+
+            StorageTask uploadTask = filePathUri.putBytes(bytes);
             uploadTask.continueWithTask(new Continuation() {
                 @Override
                 public Object then(@NonNull Task task) throws Exception {
-                    if(!task.isSuccessful()){
+                    if (!task.isSuccessful()) {
                         throw task.getException();
                     }
-                    return filePath.getDownloadUrl();
+                    return filePathUri.getDownloadUrl();
                 }
             }).addOnCompleteListener(new OnCompleteListener<Uri>() {
                 @Override
                 public void onComplete(@NonNull Task<Uri> task) {
-                    Uri downloadUri=task.getResult();
-                    imageUrl=downloadUri.toString();
+                    Uri downloadUri = task.getResult();
+                    imageUrl = downloadUri.toString();
 
-                    //every article needs permission from admin to be posted publically..
-                    //hence,first svaed in d8ifferent branch of firebase!
-                    DatabaseReference ref= FirebaseDatabase.getInstance().getReference("PermissionNeeded");
-                    String postId=ref.push().getKey();
-                    HashMap<String,Object> map=new HashMap<>();
-                    map.put("postId",postId);
-                    map.put("title",title.getText().toString());
-                    map.put("imageUrl",imageUrl);
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("PermissionNeeded");
+                    String postId = ref.push().getKey();
+                    HashMap<String, Object> map = new HashMap<>();
+                    map.put("postId", postId);
+                    map.put("title", title.getText().toString());
+                    map.put("imageUrl", imageUrl);
                     //map.put("description",description.getText().toString());
-                    map.put("article",knife.toHtml());
+                    map.put("article", knife.toHtml());
                     map.put("publisher", FirebaseAuth.getInstance().getCurrentUser().getUid());
-                    map.put("like","0");
+                    map.put("like", "0");
                     ref.child(postId).setValue(map);
 
                     /*DatabaseReference mHashTagRef=FirebaseDatabase.getInstance().getReference().child("HashTags");
@@ -163,20 +183,22 @@ public class postActivity extends AppCompatActivity {
                         }
                     }*/
                     pd.dismiss();
-                    startActivity(new Intent(postActivity.this,home.class));
+                    startActivity(new Intent(postActivity.this, home.class));
                     finish();
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(postActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(postActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
 
-        }else{
-            Toast.makeText(postActivity.this,"No image was selected",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(postActivity.this, "No image was selected", Toast.LENGTH_LONG).show();
         }
     }
+
+
 
     private String getFileExtension(Uri Uri) {
         return MimeTypeMap.getSingleton().getExtensionFromMimeType(this.getContentResolver().getType(Uri));

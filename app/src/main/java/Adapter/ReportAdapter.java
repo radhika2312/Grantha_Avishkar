@@ -14,8 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.grantha.R;
 import com.example.grantha.ReportFullView;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -98,54 +96,78 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
             public void onClick(View v) {
                 final String deleteId=post.getPostId();
 
+                deletePost(deleteId);
+                deleteBook(deleteId);
+
+                FirebaseDatabase.getInstance().getReference().child("Notifications").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(final DataSnapshot snap2:snapshot.getChildren()){
+                            final String key2=snap2.getKey();
+                            Toast.makeText(mContext,key2,Toast.LENGTH_SHORT).show();
+                            FirebaseDatabase.getInstance().getReference().child("Notifications").child(key2).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot Snapshot) {
+                                    for(DataSnapshot snap3:Snapshot.getChildren()){
+                                        Notification notify=snap3.getValue(Notification.class);
+                                        if(notify.getPostid().equals(deleteId)){
+                                            FirebaseDatabase.getInstance().getReference().child("Notifications")
+                                                    .child(key2).child(notify.getId()).removeValue();
+                                        }
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+                        }
+                    }
+
+
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+
+                FirebaseDatabase.getInstance().getReference().child("ReportAbuse").child(deleteId).removeValue();
 
 
 
 
-                FirebaseDatabase.getInstance().getReference().child("Posts").child(post.getPostId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                   @Override
-                   public void onComplete(@NonNull Task<Void> task) {
-                       if(task.isSuccessful()){
-                           deleteBook(deleteId);
-                           Toast.makeText(mContext,"Article deleted!",Toast.LENGTH_SHORT).show();
-                           FirebaseDatabase.getInstance().getReference().child("Notifications").addValueEventListener(new ValueEventListener() {
-                               @Override
-                               public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                   for(final DataSnapshot snap2:snapshot.getChildren()){
-                                       final String key2=snap2.getKey();
-                                       Toast.makeText(mContext,key2,Toast.LENGTH_SHORT).show();
-                                       FirebaseDatabase.getInstance().getReference().child("Notifications").child(key2).addValueEventListener(new ValueEventListener() {
-                                           @Override
-                                           public void onDataChange(@NonNull DataSnapshot Snapshot) {
-                                               for(DataSnapshot snap3:Snapshot.getChildren()){
-                                                   Notification notify=snap3.getValue(Notification.class);
-                                                   if(notify.getPostid().equals(deleteId)){
-                                                       FirebaseDatabase.getInstance().getReference().child("Notifications")
-                                                               .child(key2).child(notify.getId()).removeValue();
-                                                   }
-                                               }
-                                           }
-
-                                           @Override
-                                           public void onCancelled(@NonNull DatabaseError error) {
-
-                                           }
-                                       });
-                                   }
-                               }
 
 
 
-                               @Override
-                               public void onCancelled(@NonNull DatabaseError error) {
 
-                               }
-                           });
-                       }
-                   }
-               });
             }
         });
+
+    }
+
+    private void deletePost(final String deleteId) {
+        //deleting articles from post section
+        FirebaseDatabase.getInstance().getReference().child("Posts").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot snap:snapshot.getChildren())
+                {
+                    Post post1=snap.getValue(Post.class);
+                    if(post1.getPostId().equals(deleteId)){
+                        FirebaseDatabase.getInstance().getReference().child("Posts").child(post1.getPostId()).removeValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
 
     }
 
