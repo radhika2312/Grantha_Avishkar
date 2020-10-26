@@ -202,27 +202,5 @@ public class MainActivity extends AppCompatActivity {
         editor.apply();
     }
 
-    private void status(String status)
-    {
-        DatabaseReference ref= FirebaseDatabase.getInstance().getReference().child("Users")
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
-        HashMap<String,Object> map=new HashMap<>();
-
-        map.put("status",status);
-        ref.updateChildren(map);
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        status("online");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        status("offline");
-    }
 }
