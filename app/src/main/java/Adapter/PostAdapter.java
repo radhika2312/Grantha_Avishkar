@@ -249,6 +249,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             public void onClick(View v) {
 
                 final String[] flag = {"0"};
+
                 holder.report.setTag("do");
                 final DatabaseReference ref=FirebaseDatabase.getInstance().getReference().child("ReportAbuse").child(post.getPostId());
                 ref.child("spam").addValueEventListener(new ValueEventListener() {
@@ -280,9 +281,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
                     }
                 });
-                if(holder.report.getTag().equals("do")){
+                if(holder.report.getTag().equals("do") && flag[0].equals("0")){
 
-                    AlertDialog alertDialog=new AlertDialog.Builder(mContext).create();
+                    final AlertDialog alertDialog=new AlertDialog.Builder(mContext).create();
                     alertDialog.setTitle("Why you want to report?");
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "It's a spam", new DialogInterface.OnClickListener() {
                         @Override
@@ -326,10 +327,46 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                     });
 
                     alertDialog.show();
+                    ref.child("spam").addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.hasChild(firebaseUser.getUid()))
+                            {
+                                alertDialog.dismiss();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                    ref.child("inappropriate").addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if(snapshot.hasChild(firebaseUser.getUid())){
+                                alertDialog.dismiss();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
 
 
                 }
 
+            }
+        });
+
+
+        //download
+        holder.download.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((home)mContext).downloadPdf(post.getTitle(),post.getImageUrl(),post.getArticle());
             }
         });
 
@@ -363,6 +400,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         public TextView noOfViews;
         public TextView title;
         public TextView author;
+        public ImageView download;
         //SocialTextView description;
 
 
@@ -378,6 +416,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             title=itemView.findViewById(R.id.title);
             dislike=itemView.findViewById(R.id.dislike);
             report=itemView.findViewById(R.id.report);
+            download=itemView.findViewById(R.id.download);
 
             save=itemView.findViewById(R.id.save);
             noOfLikes=itemView.findViewById(R.id.no_of_likes);

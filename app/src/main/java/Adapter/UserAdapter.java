@@ -98,9 +98,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder>{
         holder.imageProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(mContext, home.class);
+                /*Intent intent=new Intent(mContext, home.class);
                 intent.putExtra("publisherId",user.getId());
-                mContext.startActivity(intent);
+                mContext.startActivity(intent);*/
+
+                mContext.getSharedPreferences("PROFILE",Context.MODE_PRIVATE).edit()
+                        .putString("profileId",user.getId()).apply();
+
+                ((FragmentActivity)mContext).getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container,new profileFragment()).commit();
 
             }
         });
@@ -108,9 +114,15 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder>{
         holder.username.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(mContext, home.class);
+                /*Intent intent=new Intent(mContext, home.class);
                 intent.putExtra("publisherId",user.getId());
-                mContext.startActivity(intent);
+                mContext.startActivity(intent);*/
+
+                mContext.getSharedPreferences("PROFILE",Context.MODE_PRIVATE).edit()
+                        .putString("profileId",user.getId()).apply();
+
+                ((FragmentActivity)mContext).getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container,new profileFragment()).commit();
 
             }
         });

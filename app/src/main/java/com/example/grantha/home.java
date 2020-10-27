@@ -3,11 +3,25 @@ package com.example.grantha;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.StrictMode;
+import android.text.Html;
+import android.text.Layout;
+import android.text.Spanned;
+import android.text.StaticLayout;
+import android.text.TextPaint;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -24,6 +38,10 @@ import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.util.Objects;
 
 import Fragments.homeFragment;
@@ -224,5 +242,64 @@ public class home extends AppCompatActivity {
     }
 
 
-    
+    public void downloadPdf(String title, final String imageUrl, String article)
+
+    {
+        PdfDocument pdfDocument= new PdfDocument();
+        final Paint paint =new Paint();
+        PdfDocument.PageInfo pageInfo =new PdfDocument.PageInfo.Builder(450,700,1).create();
+        final PdfDocument.Page page =pdfDocument.startPage(pageInfo);
+        final Canvas canvas =page.getCanvas();
+
+        paint.setTextSize(15.5f);
+        paint.setColor(Color.BLACK);
+        canvas.drawText("GRANTHA ARTICLE", 175,20,paint);
+        paint.setTextSize(12f);
+        paint.isUnderlineText();
+        paint.getFontFeatureSettings();
+        canvas.drawText(title,20,40,paint);
+        Spanned spanned = Html.fromHtml(article,1);
+        char[] chars = new char[spanned.length()];
+        TextUtils.getChars(spanned, 0, spanned.length(), chars, 0);
+        String plainText = new String(chars);
+
+        paint.setTextSize(8f);
+        TextPaint textPaint=new TextPaint();
+        textPaint.getStyle();
+        StaticLayout staticLayout = StaticLayout.Builder
+                .obtain(plainText, 0, plainText.length(),textPaint, 400)
+                .setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                .build();
+        canvas.translate(20, 60);
+        staticLayout.draw(canvas);
+
+        canvas.isHardwareAccelerated();
+
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        Bitmap bm = null;
+        try {
+            bm = BitmapFactory.decodeStream((new URL(imageUrl))
+                    .openConnection().getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Bitmap resized = Bitmap.createScaledBitmap(bm, bm.getWidth()/4, bm.getHeight()/4, true);
+        canvas.drawBitmap(resized,10,staticLayout.getHeight()+40,null);
+
+        pdfDocument.finishPage(page);
+        File file =new File(this.getExternalFilesDir("/"),title+".pdf");
+
+        try {
+            pdfDocument.writeTo(new FileOutputStream(file));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        pdfDocument.close();
+        Toast.makeText(getApplicationContext(),"PDF downloaded!",Toast.LENGTH_LONG).show();
+    }
+
+
+
+
 }

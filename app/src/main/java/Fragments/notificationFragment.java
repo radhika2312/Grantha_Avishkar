@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -184,7 +185,37 @@ public class notificationFragment extends Fragment {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for(DataSnapshot Snap :snapshot.getChildren()){
-                            notificationList.add(Snap.getValue(Notification.class));
+                            final Notification noti1=Snap.getValue(Notification.class);
+                            if(noti1.getIsPost().equals("false"))
+                            {
+                                notificationList.add(noti1);
+                            }else{
+                                DatabaseReference ref2=FirebaseDatabase.getInstance().getReference().child("Posts");
+                                ref2.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        /*if(snapshot.hasChild(noti1.getPostid()))
+                                        {
+                                            notificationList.add(noti1);
+                                        }*/
+                                        for(DataSnapshot snap:snapshot.getChildren()){
+                                            Post post2=snap.getValue(Post.class);
+                                            if(post2.getPostId().equals(noti1.getPostid())){
+                                                notificationList.add(noti1);
+                                            }
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+
+
+                            }
+
+
                         }
                         Collections.reverse(notificationList);
                         notificationAdapter.notifyDataSetChanged();
