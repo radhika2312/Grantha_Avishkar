@@ -3,6 +3,8 @@ package com.example.grantha;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,6 +28,8 @@ public class FollowersActivity extends AppCompatActivity {
     private String id;
     private String title;
     private List<String> idList;
+    private ImageView close;
+    private TextView heading;
 
     private RecyclerView recyclerView;
     private UserAdapter userAdapter;
@@ -42,14 +46,28 @@ public class FollowersActivity extends AppCompatActivity {
 
         //setting up toolbar...this time in java activity instead of xml
         Toolbar toolbar =findViewById(R.id.toolbar);
+        close=findViewById(R.id.close);
+        heading=findViewById(R.id.title);
         //setSupportActionBar(toolbar);
         if(title.equals("likes")){
-            getSupportActionBar().setTitle("Upvotes");
+            heading.setText("Upvotes");
+            //getSupportActionBar().setTitle("Upvotes");
         }else{
-            getSupportActionBar().setTitle(title);
+            heading.setText(title);
+            // getSupportActionBar().setTitle(title);
         }
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
 
         //going back to the activity from where it started..
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {

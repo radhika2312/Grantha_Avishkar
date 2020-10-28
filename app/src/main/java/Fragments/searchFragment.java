@@ -88,7 +88,7 @@ public class searchFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                searchArticles(editable.toString());
+                //searchArticles(editable.toString());
 
             }
         });
@@ -120,7 +120,7 @@ public class searchFragment extends Fragment {
     }
 
     private void readArticles() {
-        DatabaseReference reference=FirebaseDatabase.getInstance().getReference().child("POsts");
+        DatabaseReference reference=FirebaseDatabase.getInstance().getReference().child("Posts");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {

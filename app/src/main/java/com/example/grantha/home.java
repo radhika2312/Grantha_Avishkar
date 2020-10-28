@@ -33,6 +33,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
@@ -42,6 +45,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Objects;
 
 import Fragments.homeFragment;
@@ -298,6 +302,43 @@ public class home extends AppCompatActivity {
         pdfDocument.close();
         Toast.makeText(getApplicationContext(),"PDF downloaded!",Toast.LENGTH_LONG).show();
     }
+
+
+    private void status(String status)
+    {
+        DatabaseReference ref= FirebaseDatabase.getInstance().getReference().child("Users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        HashMap<String,Object> map=new HashMap<>();
+
+        map.put("status",status);
+        ref.updateChildren(map);
+
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null){
+            status("online");
+        }
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(FirebaseAuth.getInstance().getCurrentUser()!=null){
+            status("offline");
+        }
+
+    }
+
+
+
+
+
 
 
 

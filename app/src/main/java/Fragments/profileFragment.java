@@ -237,11 +237,19 @@ public class profileFragment extends Fragment {
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Logout", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        DatabaseReference ref= FirebaseDatabase.getInstance().getReference().child("Users")
+                                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+                        HashMap<String,Object> map=new HashMap<>();
+
+                        map.put("status","offline");
+                        ref.updateChildren(map);
 
                         FirebaseAuth.getInstance().signOut();
                         Intent intent=new Intent(getContext(), MainActivity.class);
                         startActivity(intent);
                         dialog.dismiss();
+
                         getActivity().finish();
 
                     }
