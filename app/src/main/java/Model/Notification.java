@@ -6,16 +6,18 @@ public class Notification {
     private String postid;
     private String isPost;
     private String id;
+    private String receiver;
 
     public Notification() {
     }
 
-    public Notification(String userid, String text, String postid, String isPost, String id) {
+    public Notification(String userid, String text, String postid, String isPost, String id, String receiver) {
         this.userid = userid;
         this.text = text;
         this.postid = postid;
         this.isPost = isPost;
         this.id = id;
+        this.receiver = receiver;
     }
 
     public String getUserid() {
@@ -56,5 +58,13 @@ public class Notification {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
     }
 }

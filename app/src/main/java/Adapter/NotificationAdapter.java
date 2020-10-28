@@ -118,7 +118,13 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Post post=snapshot.getValue(Post.class);
-                Picasso.get().load(post.getImageUrl()).placeholder(R.mipmap.ic_launcher).into(postImage);
+                if(post!=null)
+                {
+                    Picasso.get().load(post.getImageUrl()).placeholder(R.mipmap.ic_launcher).into(postImage);
+                }else{
+                    postImage.setImageResource(R.drawable.animate);
+                }
+
             }
 
             @Override

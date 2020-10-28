@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -30,7 +29,6 @@ import java.util.List;
 
 import Model.Notification;
 import Model.Post;
-import Model.User;
 
 public class TitleAdapter extends RecyclerView.Adapter<TitleAdapter.ViewHolder>{
     private Context mContext;
@@ -54,13 +52,25 @@ public class TitleAdapter extends RecyclerView.Adapter<TitleAdapter.ViewHolder>{
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
         final Post post=mArticles.get(position);
+
+
+        if(firebaseUser.getUid().equals(post.getPublisher())){
+            holder.btnEdit.setVisibility(View.VISIBLE);
+        }else{
+            holder.btnEdit.setVisibility(View.GONE);
+        }
+
 
         FirebaseDatabase.getInstance().getReference().child("Admin").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 admin=snapshot.getValue().toString();
+                if(firebaseUser.getUid().equals(admin))
+                {
+                    holder.btnEdit.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -71,11 +81,6 @@ public class TitleAdapter extends RecyclerView.Adapter<TitleAdapter.ViewHolder>{
 
         holder.title.setText(post.getTitle());
 
-        if(firebaseUser.getUid().equals(post.getPublisher()) || firebaseUser.getUid().equals(admin)){
-            holder.btnEdit.setVisibility(View.VISIBLE);
-        }else{
-            holder.btnEdit.setVisibility(View.GONE);
-        }
 
         //redirecting to full view of that article
         holder.title.setOnClickListener(new View.OnClickListener() {
@@ -126,36 +131,9 @@ public class TitleAdapter extends RecyclerView.Adapter<TitleAdapter.ViewHolder>{
 
                             final String deleteId=post.getPostId();
 
-                            deletePost(deleteId);
-                            deleteBook(deleteId);
 
 
-                            //making list of present users
-                            final List<User> users=new ArrayList<>();
-                            FirebaseDatabase.getInstance().getReference().child("Users").addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    for (DataSnapshot snap1:snapshot.getChildren()){
-                                        User user1=snap1.getValue(User.class);
-                                        users.add(user1);
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-
-
-                            //trying a query
-                            /*for(User u:users){
-                                FirebaseDatabase.getInstance().getReference().child("Bookmarks").child(u.getId())
-                                        .child(post.getPostId()).removeValue();
-                            }*/
-
-
-                            FirebaseDatabase.getInstance().getReference().child("Notifications").addValueEventListener(new ValueEventListener() {
+                            /*FirebaseDatabase.getInstance().getReference().child("Notifications").addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                     for(final DataSnapshot snap2:snapshot.getChildren()){
@@ -187,7 +165,37 @@ public class TitleAdapter extends RecyclerView.Adapter<TitleAdapter.ViewHolder>{
                                 public void onCancelled(@NonNull DatabaseError error) {
 
                                 }
+                            });*/
+
+
+
+                            FirebaseDatabase.getInstance().getReference().child("Notifications").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    for(DataSnapshot snapshot1:snapshot.getChildren()) {
+                                        Notification noti = snapshot1.getValue(Notification.class);
+                                        if (noti.getPostid().equals(deleteId)) {
+                                            FirebaseDatabase.getInstance().getReference().child("Notifications").child(noti.getId()).removeValue();
+                                        }
+                                    }
+                                   //notifyDataSetChanged();
+                                }
+
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
                             });
+
+
+                            deletePost(deleteId);
+                            deleteBook(deleteId);
+
+
+
+
+
 
                             //this creating error...so dont ever uncomment this
                             //deleting data of article from likes and comments section
@@ -240,7 +248,7 @@ public class TitleAdapter extends RecyclerView.Adapter<TitleAdapter.ViewHolder>{
                 {
                     Post post1=snap.getValue(Post.class);
                     if(post1.getPostId().equals(deleteId)){
-                        FirebaseDatabase.getInstance().getReference().child("Posts").child(post1.getPostId()).removeValue();
+                        FirebaseDatabase.getInstance().getReference().child("Posts").child(deleteId).removeValue();
                     }
                 }
             }

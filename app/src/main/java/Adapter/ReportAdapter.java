@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -96,10 +95,35 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
             public void onClick(View v) {
                 final String deleteId=post.getPostId();
 
+                FirebaseDatabase.getInstance().getReference().child("Notifications").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot snapshot1:snapshot.getChildren()) {
+                            Notification noti = snapshot1.getValue(Notification.class);
+                            if (noti.getPostid().equals(deleteId)) {
+                                FirebaseDatabase.getInstance().getReference().child("Notifications").child(noti.getId()).removeValue();
+                            }
+                        }
+                        //notifyDataSetChanged();
+                    }
+
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+
                 deletePost(deleteId);
                 deleteBook(deleteId);
 
-                FirebaseDatabase.getInstance().getReference().child("Notifications").addValueEventListener(new ValueEventListener() {
+
+
+
+
+
+                /*FirebaseDatabase.getInstance().getReference().child("Notifications").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         for(final DataSnapshot snap2:snapshot.getChildren()){
@@ -131,7 +155,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
                     public void onCancelled(@NonNull DatabaseError error) {
 
                     }
-                });
+                });*/
 
 
                 FirebaseDatabase.getInstance().getReference().child("ReportAbuse").child(deleteId).removeValue();
@@ -157,7 +181,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
                 {
                     Post post1=snap.getValue(Post.class);
                     if(post1.getPostId().equals(deleteId)){
-                        FirebaseDatabase.getInstance().getReference().child("Posts").child(post1.getPostId()).removeValue();
+                        FirebaseDatabase.getInstance().getReference().child("Posts").child(deleteId).removeValue();
                     }
                 }
             }

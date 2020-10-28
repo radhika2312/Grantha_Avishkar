@@ -97,8 +97,11 @@ public class EditArticle extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         Post post=snapshot.getValue(Post.class);
-                        title.setText(post.getTitle());
-                        knife.fromHtml(post.getArticle());
+                        if(post!=null){
+                            title.setText(post.getTitle());
+                            knife.fromHtml(post.getArticle());
+                        }
+
                     }
 
                     @Override
@@ -111,6 +114,7 @@ public class EditArticle extends AppCompatActivity {
         close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 finish();
             }
         });

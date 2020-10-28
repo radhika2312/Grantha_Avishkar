@@ -15,7 +15,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -180,38 +179,40 @@ public class notificationFragment extends Fragment {
     }
 
     private void readNotifications() {
-        FirebaseDatabase.getInstance().getReference().child("Notifications").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                .addValueEventListener(new ValueEventListener() {
+        final List<Post> posts=new ArrayList<>();
+        FirebaseDatabase.getInstance().getReference().child("Posts").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot s:snapshot.getChildren()){
+                    Post post=s.getValue(Post.class);
+                    posts.add(post);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        FirebaseDatabase.getInstance().getReference().child("Notifications").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        notificationList.clear();
                         for(DataSnapshot Snap :snapshot.getChildren()){
+
                             final Notification noti1=Snap.getValue(Notification.class);
-                            if(noti1.getIsPost().equals("false"))
+                            if(noti1.getIsPost().equals("false") && noti1.getReceiver().equals(fUser.getUid()))
                             {
                                 notificationList.add(noti1);
-                            }else{
-                                DatabaseReference ref2=FirebaseDatabase.getInstance().getReference().child("Posts");
-                                ref2.addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        /*if(snapshot.hasChild(noti1.getPostid()))
-                                        {
-                                            notificationList.add(noti1);
-                                        }*/
-                                        for(DataSnapshot snap:snapshot.getChildren()){
-                                            Post post2=snap.getValue(Post.class);
-                                            if(post2.getPostId().equals(noti1.getPostid())){
-                                                notificationList.add(noti1);
-                                            }
-                                        }
+                            }else if(noti1.getReceiver().equals(fUser.getUid())){
+
+                                for(Post p:posts)
+                                {
+                                    if(noti1.getPostid().equals(p.getPostId()))
+                                    {
+                                        notificationList.add(noti1);
                                     }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
-
+                                }
 
                             }
 

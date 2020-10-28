@@ -145,7 +145,7 @@ public class CommentActivity extends AppCompatActivity {
                             HashMap<String ,Object> map=new HashMap<>();
 
                             //adding id to each notification..
-                            DatabaseReference ref1=FirebaseDatabase.getInstance().getReference().child("Notifications").child(authorId);
+                            DatabaseReference ref1=FirebaseDatabase.getInstance().getReference().child("Notifications");
                             String id1=ref1.push().getKey();
 
                             map.put("userid",fUser.getUid());
@@ -153,6 +153,7 @@ public class CommentActivity extends AppCompatActivity {
                             map.put("postid",postId);
                             map.put("isPost","true");
                             map.put("id",id1);
+                            map.put("receiver",authorId);
 
 
 

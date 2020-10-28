@@ -573,13 +573,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         HashMap<String ,Object> map=new HashMap<>();
 
         //adding id to each notification..
-        DatabaseReference ref1=FirebaseDatabase.getInstance().getReference().child("Notifications").child(publisher);
+        DatabaseReference ref1=FirebaseDatabase.getInstance().getReference().child("Notifications");
         String id=ref1.push().getKey();
         map.put("userid",firebaseUser.getUid());
         map.put("text","liked your article");
         map.put("postid",postId);
         map.put("isPost","true");
         map.put("id",id);
+        map.put("receiver",publisher);
 
 
 

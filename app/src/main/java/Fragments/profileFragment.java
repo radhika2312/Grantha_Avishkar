@@ -158,13 +158,14 @@ public class profileFragment extends Fragment {
                     //adding notifications
                     HashMap<String ,Object> map=new HashMap<>();
                     //adding id..
-                    DatabaseReference ref1=FirebaseDatabase.getInstance().getReference().child("Notifications").child(profileId);
+                    DatabaseReference ref1=FirebaseDatabase.getInstance().getReference().child("Notifications");
                     String id1=ref1.push().getKey();
                     map.put("userid",fUser.getUid());
                     map.put("text","started following you");
                     map.put("postid","");
                     map.put("isPost","false");
                     map.put("id",id1);
+                    map.put("receiver",profileId);
 
                     ref1.child(id1).setValue(map);
 
@@ -241,6 +242,7 @@ public class profileFragment extends Fragment {
                         Intent intent=new Intent(getContext(), MainActivity.class);
                         startActivity(intent);
                         dialog.dismiss();
+                        getActivity().finish();
 
                     }
                 });
