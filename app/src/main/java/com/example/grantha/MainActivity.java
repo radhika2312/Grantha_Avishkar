@@ -1,12 +1,16 @@
 package com.example.grantha;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         loadPreferences();
+        schedulealarm();
         if(FirebaseAuth.getInstance().getCurrentUser()==null)
         {
             loggedIn="no";
@@ -60,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
+
         setContentView(R.layout.activity_main);
 
         email = findViewById(R.id.Email);
@@ -200,6 +206,23 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor=sharedPreferences.edit();
         editor.putString("User",email_);
         editor.apply();
+    }
+
+    private void schedulealarm() {
+
+        // Construct an intent that will execute the AlarmReceiver
+        Intent intent = new Intent(this, AlarmReciever.class);
+        // Create a PendingIntent to be triggered when the alarm goes off
+        final PendingIntent pIntent = PendingIntent.getBroadcast(this, AlarmReciever.REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        // Setup periodic alarm every every half hour from this point onwards
+        AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        // First parameter is the type: ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC_WAKEUP
+        // Interval can be INTERVAL_FIFTEEN_MINUTES, INTERVAL_HALF_HOUR, INTERVAL_HOUR, INTERVAL_DAY
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime(),
+                1000*40, pIntent);
+        Log.e("Info","Reached Here");
+
     }
 
 
