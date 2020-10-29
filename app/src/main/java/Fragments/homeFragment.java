@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.grantha.ChatActivity;
 import com.example.grantha.R;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -39,6 +40,8 @@ public class homeFragment extends Fragment {
     private List<Post> postList;
 
     private ImageView chat;
+
+    private List<String> followingList;
 
 
 
@@ -64,8 +67,11 @@ public class homeFragment extends Fragment {
         postAdapter=new PostAdapter(getContext(),postList);
         recyclerViewPosts.setAdapter(postAdapter);
 
+        followingList=new ArrayList<>();
+
         //recyclerViewPosts.setAdapter(postAdapter);
-        readPosts();
+        //readPosts();
+        checkFollowingUsers();
 
         chat.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,6 +83,27 @@ public class homeFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void checkFollowingUsers() {
+        FirebaseDatabase.getInstance().getReference().child("Follow").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .child("following").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                followingList.clear();
+                for(DataSnapshot Snap:snapshot.getChildren())
+                {
+                    followingList.add(Snap.getKey());
+                }
+                followingList.add(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                readPosts();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     //sort feature
@@ -116,7 +143,14 @@ public class homeFragment extends Fragment {
                 postList.clear();
                 for(DataSnapshot Snapshot:snapshot.getChildren()){
                     Post post=Snapshot.getValue(Post.class);
-                    postList.add(post);
+                    for(String id:followingList)
+                    {
+                        if(post.getPublisher().equals(id))
+                        {
+                            postList.add(post);
+                        }
+                    }
+
 
                 }
                 postAdapter.notifyDataSetChanged();
