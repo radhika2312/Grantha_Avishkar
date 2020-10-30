@@ -3,6 +3,7 @@ package com.example.grantha;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -65,6 +66,8 @@ public class home extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        //for restricting to portrait mode
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         
         /*//detect dynamic link
          FirebaseDynamicLinks.getInstance()
@@ -108,6 +111,26 @@ public class home extends AppCompatActivity {
                 });*/
 
         bottomNavigationView=findViewById(R.id.bottom_navigation);
+
+        //when redirected from comment activity
+        Bundle intent =getIntent().getExtras();
+        if(intent!=null){
+
+            String profileId=intent.getString("publisherId");
+            //using shared preferences
+            getSharedPreferences("PROFILE",MODE_PRIVATE).edit().putString("profileId",profileId).apply();
+
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new profileFragment()).commit();
+            //change the selected fragment at bottom bar
+            bottomNavigationView.setSelectedItemId(R.id.nav_person);
+
+        }else{
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new homeFragment()).commit();
+        }
+
+
+
+
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
@@ -132,7 +155,7 @@ public class home extends AppCompatActivity {
                         break;
                 }
                 if (selectorFragment!=null){
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectorFragment).commit();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,selectorFragment).addToBackStack(null).commit();
 
                 }
                 return true;
@@ -140,7 +163,7 @@ public class home extends AppCompatActivity {
             }
         });
         //when redirected from comment activity
-        Bundle intent =getIntent().getExtras();
+       /* Bundle intent =getIntent().getExtras();
         if(intent!=null){
 
             String profileId=intent.getString("publisherId");
@@ -153,7 +176,7 @@ public class home extends AppCompatActivity {
 
         }else{
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,new homeFragment()).commit();
-        }
+        }*/
 
 
 

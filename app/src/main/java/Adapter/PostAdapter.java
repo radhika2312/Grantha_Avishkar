@@ -125,7 +125,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         holder.like.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (holder.like.getTag().equals("like")) {
+                if(holder.dislike.getTag().equals("disliked"))
+                {
+                    Toast.makeText(mContext,"Up-Down Vote can't be done together",Toast.LENGTH_SHORT).show();
+                }
+                else if (holder.like.getTag().equals("like")) {
                     FirebaseDatabase.getInstance().getReference().child("Likes").child(post.getPostId())
                             .child(firebaseUser.getUid()).setValue(true);
                     addNotification(post.getPostId(),post.getPublisher());
@@ -142,7 +146,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         holder.dislike.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(holder.dislike.getTag().equals("dislike")){
+                if(holder.like.getTag().equals("liked"))
+                {
+                    Toast.makeText(mContext,"Up-Down Vote can't be done together",Toast.LENGTH_SHORT).show();
+                }
+                else if(holder.dislike.getTag().equals("dislike")){
                     FirebaseDatabase.getInstance().getReference().child("Dislikes").child(post.getPostId())
                             .child(firebaseUser.getUid()).setValue(true);
                 }else{
@@ -212,7 +220,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             public void onClick(View v) {
                 mContext.getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit().putString("postId",post.getPostId()).apply();
                 ((FragmentActivity)mContext).getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container,new PostDetail()).commit();
+                        .replace(R.id.fragment_container,new PostDetail()).addToBackStack(null).commit();
 
             }
         });

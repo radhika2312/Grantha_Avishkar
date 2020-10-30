@@ -88,7 +88,7 @@ public class TitleAdapter extends RecyclerView.Adapter<TitleAdapter.ViewHolder>{
             public void onClick(View v) {
                 mContext.getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit().putString("postId",post.getPostId()).apply();
                 ((FragmentActivity)mContext).getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container,new PostDetail()).commit();
+                        .replace(R.id.fragment_container,new PostDetail()).addToBackStack(null).commit();
 
             }
         });
