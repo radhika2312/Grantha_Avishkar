@@ -12,6 +12,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:id="@+id/bar"
         android:background="?android:attr/windowBackground">
         <androidx.appcompat.widget.Toolbar
@@ -44,61 +45,43 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_above="@+id/title">
 
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:id="@+id/image_added"
+            android:src="@drawable/animate"/>
+
+
+
+    </LinearLayout>
 
 
     <EditText
+        android:id="@+id/title"
+        android:layout_marginTop="50dp"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:padding="10dp"
+        android:layout_above="@+id/knife"
         android:hint="Set title for article"
-        android:id="@+id/title"
-        android:layout_below="@+id/bar"
-        android:layout_margin="10dp"
+        android:padding="10dp"
         android:textAlignment="gravity"
-        android:textColor="@color/colorPrimary"/>
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_below="@+id/title"
-        android:id="@+id/image_added"
-        android:src="@drawable/animate"/>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/image_added">
-    <io.github.mthli.knife.KnifeText
-        android:id="@+id/knife"
-        android:layout_margin="7dp"
-        android:layout_width="match_parent"
-        android:layout_height="297dp"
-        android:layout_above="@id/tools"
-        android:hint="Write your article here ...."
-        android:background="@android:color/transparent"
-        android:gravity="top|start"
-        android:paddingStart="16dp"
-        android:paddingLeft="16dp"
-        android:paddingTop="16dp"
-        android:paddingEnd="16dp"
-        android:paddingRight="16dp"
-        android:scrollbars="vertical"
-        app:bulletColor="@color/blue_500"
-        app:bulletGapWidth="@dimen/bullet_gap_width"
-        app:bulletRadius="@dimen/bullet_radius"
-        app:historyEnable="true"
-        app:historySize="99"
-        app:linkColor="@color/blue_500"
-        app:linkUnderline="true"
-        app:quoteCapWidth="@dimen/quote_gap_width"
-        app:quoteColor="@color/blue_500"
-        app:quoteStripeWidth="@dimen/quote_stripe_width">
+        android:textColor="@color/colorPrimary" />
 
-    </io.github.mthli.knife.KnifeText>
+
+
+
 
     <HorizontalScrollView android:id="@+id/tools"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-           android:layout_alignParentBottom="true"
+            android:layout_alignParentBottom="true"
             android:scrollbars="none">
 
             <LinearLayout android:orientation="horizontal"
@@ -181,7 +164,37 @@
 
         </HorizontalScrollView>
 
-    </RelativeLayout>
+
+    <io.github.mthli.knife.KnifeText
+        android:id="@+id/knife"
+        android:layout_margin="7dp"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_above="@id/tools"
+        android:hint="Write your article here ...."
+        android:background="@android:color/transparent"
+        android:gravity="top|start"
+        android:paddingStart="16dp"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="16dp"
+        android:paddingRight="16dp"
+        android:scrollbars="vertical"
+        app:bulletColor="@color/blue_500"
+        app:bulletGapWidth="@dimen/bullet_gap_width"
+        app:bulletRadius="@dimen/bullet_radius"
+        app:historyEnable="true"
+        app:historySize="99"
+        app:linkColor="@color/blue_500"
+        app:linkUnderline="true"
+        app:quoteCapWidth="@dimen/quote_gap_width"
+        app:quoteColor="@color/blue_500"
+        app:quoteStripeWidth="@dimen/quote_stripe_width">
+
+    </io.github.mthli.knife.KnifeText>
+
+
+
 
 
 

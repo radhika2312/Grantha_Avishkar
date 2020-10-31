@@ -96,7 +96,7 @@ public class EditProfile extends AppCompatActivity {
 
             }
         });
-
+        
         close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
