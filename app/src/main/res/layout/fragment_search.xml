@@ -37,6 +37,33 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="-5dp"
+                android:id="@+id/bottom"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:id="@+id/search_user"
+                    android:src="@drawable/ic_search_user"
+                    style="?android:attr/buttonBarButtonStyle"/>
+
+                <ImageButton
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:id="@+id/search_articles"
+                    android:src="@drawable/ic_seach_articles"
+                    style="?android:attr/buttonBarButtonStyle"/>
+
+            </LinearLayout>
+
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -46,6 +73,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view_articles"
                 android:layout_width="match_parent"
+                android:visibility="gone"
                 android:layout_height="wrap_content" />
 
 

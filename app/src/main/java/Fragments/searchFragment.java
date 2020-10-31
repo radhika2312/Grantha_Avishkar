@@ -7,6 +7,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -40,6 +41,8 @@ public class searchFragment extends Fragment {
     private SocialAutoCompleteTextView search_bar;
     private UserAdapter userAdapter;
     private ArticleAdapter articleAdapter;
+    private ImageButton searchUser;
+    private ImageButton searchArticles;
 
 
 
@@ -56,12 +59,35 @@ public class searchFragment extends Fragment {
         recyclerView.setAdapter(userAdapter);
         //for articles
         recyclerView_articles=view.findViewById(R.id.recycler_view_articles);
+        searchUser=view.findViewById(R.id.search_user);
+        searchArticles=view.findViewById(R.id.search_articles);
         recyclerView_articles.setHasFixedSize(true);
         recyclerView_articles.setLayoutManager(new LinearLayoutManager(getContext()));
 
         mArticles=new ArrayList<>();
         articleAdapter=new ArticleAdapter(getContext(),mArticles);
         recyclerView_articles.setAdapter(articleAdapter);
+
+        recyclerView.setVisibility(View.VISIBLE);
+        recyclerView_articles.setVisibility(View.GONE);
+
+        searchUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recyclerView.setVisibility(View.VISIBLE);
+                recyclerView_articles.setVisibility(View.GONE);
+
+            }
+        });
+
+        searchArticles.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recyclerView.setVisibility(View.GONE);
+                recyclerView_articles.setVisibility(View.VISIBLE);
+            }
+        });
+
 
 
 
